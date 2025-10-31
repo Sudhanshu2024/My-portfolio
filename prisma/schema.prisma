@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum DisplayLocation {
+  HOME_AND_BLOG  // Value 1 - Shows on homepage AND blog page
+  BLOG_ONLY      // Value 2 - Shows ONLY on blog page
+}
+
+model Blog {
+  id              Int              @id @default(autoincrement())
+  status          String           @default("Draft")
+  slug            String           @unique
+  title           String
+  preview         String?
+  body            String?
+  tags            String[]
+  thumbnail       String?
+  displayLocation DisplayLocation  @default(BLOG_ONLY)
+  datePublished   DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model Project {
+  id            Int       @id @default(autoincrement())
+  status        String    @default("Draft")
+  slug          String    @unique
+  title         String
+  preview       String?   // Short description for homepage
+  body          String?   // Full project details
+  thumbnail     String?   // Project image
+  tags          String[]  // Technologies used
+  demoUrl       String?   // Live demo link
+  githubUrl     String?   // GitHub repository
+  featured      Boolean   @default(false) // Show on homepage
+  dateCompleted DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
