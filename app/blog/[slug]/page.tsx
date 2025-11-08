@@ -4,13 +4,13 @@ import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 
 interface BlogPageProps {
-  params: Promise<{
+  params: {
     slug: string
-  }>
+  }
 }
 
 export async function generateMetadata({ params }: BlogPageProps) {
-  const { slug } = await params
+  const { slug } = params
   const blog = await prisma.blog.findUnique({
     where: { slug },
   })
@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: BlogPageProps) {
 }
 
 export default async function BlogPage({ params }: BlogPageProps) {
-  const { slug } = await params
+  const { slug } = params
   const blog = await prisma.blog.findUnique({
     where: { slug },
   })
@@ -80,4 +80,3 @@ export default async function BlogPage({ params }: BlogPageProps) {
     </article>
   )
 }
-
