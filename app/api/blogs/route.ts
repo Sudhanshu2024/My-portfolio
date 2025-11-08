@@ -25,13 +25,13 @@ export async function GET() {
       },
     })
 
-    return NextResponse.json(blogs)
+    // ✅ ALWAYS RETURN ARRAY
+    return NextResponse.json(Array.isArray(blogs) ? blogs : [])
   } catch (error) {
     console.error('Error fetching blogs:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch blogs' },
-      { status: 500 }
-    )
+
+    // ✅ Return empty array instead of error object
+    return NextResponse.json([], { status: 200 })
   }
 }
 
@@ -74,4 +74,3 @@ export async function POST(request: Request) {
     )
   }
 }
-

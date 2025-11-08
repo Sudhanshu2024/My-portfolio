@@ -26,13 +26,13 @@ export async function GET() {
       },
     })
 
-    return NextResponse.json(projects)
+    // ✅ ALWAYS return an array (never an error object)
+    return NextResponse.json(Array.isArray(projects) ? projects : [])
   } catch (error) {
     console.error('Error fetching projects:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch projects' },
-      { status: 500 }
-    )
+    
+    // ✅ Fallback: still return empty array so UI never breaks
+    return NextResponse.json([], { status: 200 })
   }
 }
 
@@ -87,4 +87,3 @@ export async function POST(request: Request) {
     )
   }
 }
-
