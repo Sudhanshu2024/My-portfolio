@@ -8,13 +8,19 @@ export default function HireMe() {
   const cvPath = '/cv.pdf' // Path to CV file in public folder
 
   const handleDownloadCV = () => {
-    // Create a link element and trigger download
-    const link = document.createElement('a')
-    link.href = cvPath
-    link.download = 'Sudhanshu_CV.pdf'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    try {
+      // Create a link element and trigger download
+      const link = document.createElement('a')
+      link.href = cvPath
+      link.download = 'Sudhanshu_CV.pdf'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } catch (error) {
+      console.error('Error downloading CV:', error)
+      // Fallback: open in new tab if download fails
+      window.open(cvPath, '_blank')
+    }
   }
 
   const handleEmailClick = () => {
