@@ -4,39 +4,71 @@ import { prisma } from '@/lib/prisma'
 export async function GET() {
   try {
     const blogs = await prisma.blog.findMany({
-      where: { status: 'Published' },
-      orderBy: { datePublished: 'desc' },
-    })
-    return NextResponse.json(blogs)
-  } catch (error) {
-    console.error(error)
-    return NextResponse.json({ error: 'Failed to fetch blogs' }, { status: 500 })
-  }
-}
-
-export async function POST(req: Request) {
-  try {
-    const body = await req.json()
-    const { slug, title, preview, body: content, tags, status } = body
-
-    if (!slug || !title)
-      return NextResponse.json({ error: 'Slug and title are required' }, { status: 400 })
-
-    const newBlog = await prisma.blog.create({
-      data: {
-        slug,
-        title,
-        preview,
-        body: content,
-        tags,
-        status: status || 'Draft',
-        datePublished: status === 'Published' ? new Date() : null,
+      where: {
+        publishedAt: {
+          not: null,
+        },
+      },
+      orderBy: {
+        publishedAt: 'desc',
+      },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        summary: true,
+        thumbnail: true,
+        createdAt: true,
       },
     })
 
-    return NextResponse.json(newBlog, { status: 201 })
+    return NextResponse.json(blogs)
   } catch (error) {
-    console.error(error)
-    return NextResponse.json({ error: 'Failed to create blog' }, { status: 500 })
+    console.error('Error fetching blogs:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch blogs' },
+      { status: 500 }
+    )
   }
 }
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json()
+    const { title, slug, summary, content, thumbnail, image, publishedAt } = body
+
+    if (!title || !slug || !summary || !content) {
+      return NextResponse.json(
+        { error: 'Missing required fields: title, slug, summary, content' },
+        { status: 400 }
+      )
+    }
+
+    const blog = await prisma.blog.create({
+      data: {
+        title,
+        slug,
+        summary,
+        content,
+        thumbnail: thumbnail || null,
+        image: image || null,
+        publishedAt: publishedAt ? new Date(publishedAt) : new Date(),
+      },
+    })
+
+    return NextResponse.json(blog, { status: 201 })
+  } catch (error: any) {
+    console.error('Error creating blog:', error)
+    if (error.code === 'P2002') {
+      return NextResponse.json(
+        { error: 'Blog with this slug already exists' },
+        { status: 409 }
+      )
+    }
+    return NextResponse.json(
+      { error: 'Failed to create blog' },
+      { status: 500 }
+    )
+  }
+}
+

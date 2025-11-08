@@ -1,48 +1,35 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
-import { ThemeProvider } from 'next-themes';
+import type { Metadata } from 'next'
+import { Montserrat } from 'next/font/google'
+import './globals.css'
+import Navbar from '@/components/Navbar'
+import { ThemeProvider } from '@/components/ThemeProvider'
 
-const inter = Inter({ subsets: ['latin'] });
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  variable: '--font-montserrat',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
-  title: process.env.NEXT_PUBLIC_SITE_NAME || 'Portfolio',
-  description: process.env.NEXT_PUBLIC_SITE_DESCRIPTION || 'Personal portfolio showcasing projects and blog posts',
-  keywords: ['portfolio', 'web development', 'nextjs', 'react', 'typescript'],
-  authors: [{ name: 'Your Name' }],
-  creator: 'Your Name',
-  openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    url: 'https://your-portfolio.vercel.app',
-    title: process.env.NEXT_PUBLIC_SITE_NAME || 'Portfolio',
-    description: process.env.NEXT_PUBLIC_SITE_DESCRIPTION || 'Personal portfolio showcasing projects and blog posts',
-    siteName: process.env.NEXT_PUBLIC_SITE_NAME || 'Portfolio',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: process.env.NEXT_PUBLIC_SITE_NAME || 'Portfolio',
-    description: process.env.NEXT_PUBLIC_SITE_DESCRIPTION || 'Personal portfolio showcasing projects and blog posts',
-  },
-};
+  title: 'Sudhanshu Portfolio',
+  description: 'Personal portfolio website',
+}
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
-      <body className={`${inter.className} antialiased`} suppressHydrationWarning>
-        <ThemeProvider 
-          attribute="class" 
-          defaultTheme="dark" 
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
+      <body className={`${montserrat.variable} font-sans antialiased`}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <Navbar />
+          <main className="mx-auto max-w-4xl px-6 pt-24">
+            {children}
+          </main>
         </ThemeProvider>
       </body>
     </html>
-  );
+  )
 }

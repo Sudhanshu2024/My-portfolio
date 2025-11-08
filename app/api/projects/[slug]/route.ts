@@ -7,24 +7,24 @@ export async function GET(
 ) {
   try {
     const { slug } = await params
-    const blog = await prisma.blog.findUnique({
+    const project = await prisma.project.findUnique({
       where: {
         slug,
       },
     })
 
-    if (!blog) {
+    if (!project) {
       return NextResponse.json(
-        { error: 'Blog not found' },
+        { error: 'Project not found' },
         { status: 404 }
       )
     }
 
-    return NextResponse.json(blog)
+    return NextResponse.json(project)
   } catch (error) {
-    console.error('Error fetching blog:', error)
+    console.error('Error fetching project:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch blog' },
+      { error: 'Failed to fetch project' },
       { status: 500 }
     )
   }

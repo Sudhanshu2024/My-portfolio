@@ -1,90 +1,83 @@
-// app/blog/[slug]/page.tsx
-import { notFound } from 'next/navigation';
-import BlogContent from './BlogContent';
-import { Metadata } from 'next';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { notFound } from 'next/navigation'
+import Image from 'next/image'
+import Link from 'next/link'
+import { prisma } from '@/lib/prisma'
 
-// Prisma Blog type
-interface BlogPost {
-  id: number;
-  slug: string;
-  title: string;
-  preview?: string | null;
-  body?: string | null;
-  tags: string[];
-  datePublished?: Date | string | null;
-  status: string;
-  createdAt: Date | string;
-  updatedAt: Date | string;
+interface BlogPageProps {
+  params: Promise<{
+    slug: string
+  }>
 }
 
-// Fetch blog post from Prisma API
-async function getBlogPost(slug: string): Promise<BlogPost | null> {
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/blogs/${slug}`,
-      { cache: 'no-store' }
-    );
+export async function generateMetadata({ params }: BlogPageProps) {
+  const { slug } = await params
+  const blog = await prisma.blog.findUnique({
+    where: { slug },
+  })
 
-    if (!res.ok) {
-      return null;
-    }
-
-    return res.json();
-  } catch (error) {
-    console.error('Error fetching blog post:', error);
-    return null;
-  }
-}
-
-// Generate metadata
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string };
-}): Promise<Metadata> {
-  const post = await getBlogPost(params.slug);
-
-  if (!post) {
+  if (!blog) {
     return {
-      title: 'Post Not Found',
-    };
+      title: 'Blog Not Found',
+    }
   }
 
   return {
-    title: `${post.title} | Your Name`,
-    description: post.preview || post.title,
-    openGraph: {
-      title: post.title,
-      description: post.preview || post.title,
-      type: 'article',
-      publishedTime: post.datePublished?.toString() || post.createdAt.toString(),
-      tags: post.tags,
-    },
-  };
+    title: blog.title,
+    description: blog.summary,
+  }
 }
 
-export default async function BlogPostPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  const post = await getBlogPost(params.slug);
+export default async function BlogPage({ params }: BlogPageProps) {
+  const { slug } = await params
+  const blog = await prisma.blog.findUnique({
+    where: { slug },
+  })
 
-  if (!post) {
-    notFound();
+  if (!blog) {
+    notFound()
   }
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      <main className="bg-background py-16">
-        <div className="container">
-          <BlogContent post={post} />
-        </div>
-      </main>
-      <Footer />
-    </div>
-  );
+    <article className="min-h-screen pt-20 pb-24 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <Link
+          href="/"
+          className="inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-8 transition-colors"
+        >
+          ← Back to home
+        </Link>
+
+        <header className="mb-12">
+          <h1 className="text-4xl sm:text-5xl font-light mb-6">{blog.title}</h1>
+          {blog.publishedAt && (
+            <time className="text-sm text-gray-500 dark:text-gray-400">
+              {new Date(blog.publishedAt).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </time>
+          )}
+        </header>
+
+        {blog.image && (
+          <div className="relative w-full h-96 mb-12 rounded-lg overflow-hidden">
+            <Image
+              src={blog.image}
+              alt={blog.title}
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+        )}
+
+        <div
+          className="prose prose-lg dark:prose-invert max-w-none"
+          dangerouslySetInnerHTML={{ __html: blog.content }}
+        />
+      </div>
+    </article>
+  )
 }
+
