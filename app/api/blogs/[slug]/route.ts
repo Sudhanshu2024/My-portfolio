@@ -6,10 +6,10 @@ export const runtime = 'nodejs'
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: { slug: string } }
 ) {
   try {
-    const { slug } = await params
+    const { slug } = params
 
     const blog = await prisma.blog.findUnique({
       where: { slug },
