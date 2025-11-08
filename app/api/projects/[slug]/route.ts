@@ -5,13 +5,21 @@ export const dynamic = 'force-dynamic'
 export const dynamicParams = true
 export const revalidate = 0
 export const runtime = 'nodejs'
+export const fetchCache = 'force-no-store'
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ slug: string }> } // Changed to Promise
+  { params }: { params: { slug: string } }
 ) {
   try {
-    const { slug } = await params // Added await
+    const { slug } = params
+
+    if (!slug) {
+      return NextResponse.json(
+        { error: 'Slug is required' },
+        { status: 400 }
+      )
+    }
 
     const project = await prisma.project.findUnique({
       where: { slug },
