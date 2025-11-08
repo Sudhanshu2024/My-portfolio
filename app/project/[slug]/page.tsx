@@ -1,16 +1,19 @@
+export const dynamic = "force-dynamic";
+
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 
 interface ProjectPageProps {
-  params: Promise<{
+  params: {
     slug: string
-  }>
+  }
 }
 
 export async function generateMetadata({ params }: ProjectPageProps) {
-  const { slug } = await params
+  const { slug } = params
+
   const project = await prisma.project.findUnique({
     where: { slug },
   })
@@ -28,7 +31,8 @@ export async function generateMetadata({ params }: ProjectPageProps) {
 }
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
-  const { slug } = await params
+  const { slug } = params
+
   const project = await prisma.project.findUnique({
     where: { slug },
   })
@@ -120,4 +124,3 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     </article>
   )
 }
-
