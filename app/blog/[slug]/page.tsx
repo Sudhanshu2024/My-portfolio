@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -11,6 +13,7 @@ interface BlogPageProps {
 
 export async function generateMetadata({ params }: BlogPageProps) {
   const { slug } = params
+
   const blog = await prisma.blog.findUnique({
     where: { slug },
   })
@@ -29,6 +32,7 @@ export async function generateMetadata({ params }: BlogPageProps) {
 
 export default async function BlogPage({ params }: BlogPageProps) {
   const { slug } = params
+
   const blog = await prisma.blog.findUnique({
     where: { slug },
   })
