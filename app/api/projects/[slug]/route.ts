@@ -8,10 +8,10 @@ export const runtime = 'nodejs'
 
 export async function GET(
   request: Request,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> } // Changed to Promise
 ) {
   try {
-    const { slug } = params
+    const { slug } = await params // Added await
 
     const project = await prisma.project.findUnique({
       where: { slug },

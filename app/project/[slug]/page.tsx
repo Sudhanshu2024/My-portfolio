@@ -1,10 +1,12 @@
 export const dynamic = "force-dynamic";
 export const dynamicParams = true;
+export const revalidate = 0;
 
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
+import type { Metadata } from 'next'
 
 interface ProjectPageProps {
   params: {
@@ -12,33 +14,49 @@ interface ProjectPageProps {
   }
 }
 
-export async function generateMetadata({ params }: ProjectPageProps) {
-  const { slug } = params
+export async function generateMetadata({ params }: ProjectPageProps): Promise<Metadata> {
+  try {
+    const { slug } = params
 
-  const project = await prisma.project.findUnique({
-    where: { slug },
-  })
+    const project = await prisma.project.findUnique({
+      where: { slug },
+    })
 
-  if (!project) {
-    return {
-      title: 'Project Not Found',
+    if (!project) {
+      return {
+        title: 'Project Not Found',
+        description: 'The requested project could not be found',
+      }
     }
-  }
 
-  return {
-    title: project.title,
-    description: project.description,
+    return {
+      title: project.title,
+      description: project.description || 'Project details',
+    }
+  } catch (error) {
+    console.error('Error generating metadata:', error)
+    return {
+      title: 'Project',
+      description: 'Project details',
+    }
   }
 }
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
-  const { slug } = params
+  let project;
 
-  const project = await prisma.project.findUnique({
-    where: { slug },
-  })
+  try {
+    const { slug } = params
 
-  if (!project) {
+    project = await prisma.project.findUnique({
+      where: { slug },
+    })
+
+    if (!project) {
+      notFound()
+    }
+  } catch (error) {
+    console.error('Error loading project:', error)
     notFound()
   }
 
@@ -46,10 +64,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     <article className="min-h-screen pt-20 pb-24 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <Link
-          href="/"
+          href="/projects"
           className="inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-8 transition-colors"
         >
-          ← Back to home
+          ← Back to projects
         </Link>
 
         <header className="mb-12">
@@ -77,17 +95,19 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
         )}
 
-        <div className="prose prose-lg dark:prose-invert max-w-none mb-8">
-          <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-            {project.description}
-          </p>
-        </div>
+        {project.description && (
+          <div className="prose prose-lg dark:prose-invert max-w-none mb-8">
+            <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+              {project.description}
+            </p>
+          </div>
+        )}
 
-        {project.techStack && project.techStack.length > 0 && (
+        {project.techStack && Array.isArray(project.techStack) && project.techStack.length > 0 && (
           <div className="mb-8">
             <h2 className="text-xl font-medium mb-4">Tech Stack</h2>
             <div className="flex flex-wrap gap-2">
-              {project.techStack.map((tech, i) => (
+              {project.techStack.map((tech: string, i: number) => (
                 <span
                   key={i}
                   className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md text-sm"
@@ -99,7 +119,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
         )}
 
-        <div className="flex gap-4">
+        <div className="flex gap-4 flex-wrap">
           {project.link && (
             <a
               href={project.link}
@@ -110,6 +130,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               Visit Project
             </a>
           )}
+
           {project.github && (
             <a
               href={project.github}
