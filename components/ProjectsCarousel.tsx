@@ -1,39 +1,16 @@
 'use client'
 
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-
-interface Project {
-  id: string
-  title: string
-  slug: string
-  description: string
-  thumbnail: string | null
-  techStack: string[]
-  createdAt: string
-}
+import { useProjects } from '@/lib/hooks/useProjects'
 
 export default function ProjectsCarousel() {
-  const [projects, setProjects] = useState<Project[]>([])
-  const [loading, setLoading] = useState(true)
+  const { projects, isLoading } = useProjects()
   const carouselRef = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(0)
-
-  useEffect(() => {
-    fetch('/api/projects')
-      .then((res) => res.json())
-      .then((data) => {
-        setProjects(data)
-        setLoading(false)
-      })
-      .catch((err) => {
-        console.error('Error fetching projects:', err)
-        setLoading(false)
-      })
-  }, [])
 
   useEffect(() => {
     if (carouselRef.current) {
@@ -54,7 +31,7 @@ export default function ProjectsCarousel() {
     animate(x, newX, { type: 'spring', stiffness: 300, damping: 30 })
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-950">
         <div className="max-w-7xl mx-auto">

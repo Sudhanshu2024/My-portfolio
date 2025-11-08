@@ -2,37 +2,13 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
 import Image from 'next/image'
-
-interface Project {
-  id: string
-  title: string
-  slug: string
-  description: string
-  thumbnail: string | null
-  techStack: string[]
-  createdAt: string
-}
+import { useProjects } from '@/lib/hooks/useProjects'
 
 export default function ProjectsGrid() {
-  const [projects, setProjects] = useState<Project[]>([])
-  const [loading, setLoading] = useState(true)
+  const { projects, isLoading } = useProjects()
 
-  useEffect(() => {
-    fetch('/api/projects')
-      .then((res) => res.json())
-      .then((data) => {
-        setProjects(data)
-        setLoading(false)
-      })
-      .catch((err) => {
-        console.error('Error fetching projects:', err)
-        setLoading(false)
-      })
-  }, [])
-
-  if (loading) {
+  if (isLoading) {
     return (
       <section className="py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">

@@ -4,11 +4,8 @@ import { prisma } from '@/lib/prisma'
 // These export configs tell Next.js NOT to try to statically generate this route
 export const dynamic = 'force-dynamic'
 export const dynamicParams = true
-export const revalidate = 0
+export const revalidate = 300 // Revalidate every 5 minutes
 export const runtime = 'nodejs'
-
-// Add this to prevent static generation
-export const fetchCache = 'force-no-store'
 
 export async function GET(
   request: Request,
@@ -35,7 +32,11 @@ export async function GET(
       )
     }
 
-    return NextResponse.json(blog)
+    return NextResponse.json(blog, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+      },
+    })
   } catch (error) {
     console.error('Error fetching blog:', error)
     return NextResponse.json(

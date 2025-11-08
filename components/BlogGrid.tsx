@@ -2,41 +2,17 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
 import Image from 'next/image'
-
-interface Blog {
-  id: string
-  title: string
-  slug: string
-  summary: string
-  thumbnail: string | null
-  createdAt: string
-}
+import { useBlogs } from '@/lib/hooks/useBlogs'
 
 interface BlogGridProps {
   limit?: number // Optional limit - if not provided, shows all blogs
 }
 
 export default function BlogGrid({ limit }: BlogGridProps) {
-  const [blogs, setBlogs] = useState<Blog[]>([])
-  const [loading, setLoading] = useState(true)
+  const { blogs, isLoading } = useBlogs(limit)
 
-  useEffect(() => {
-    fetch('/api/blogs')
-      .then((res) => res.json())
-      .then((data) => {
-        // If limit is provided, slice the array; otherwise show all
-        setBlogs(limit ? data.slice(0, limit) : data)
-        setLoading(false)
-      })
-      .catch((err) => {
-        console.error('Error fetching blogs:', err)
-        setLoading(false)
-      })
-  }, [limit])
-
-  if (loading) {
+  if (isLoading) {
     return (
       <section className="py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
